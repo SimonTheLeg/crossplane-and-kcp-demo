@@ -12,7 +12,7 @@ Additionally since kcp only works with hostnames, we also set the hostalias in t
 Then to also be able to use hostnames, we modify /etc/host on the local machine to have "kcp.dev.local" to point to localhost.
 
 # Regular Setup
-All commands should be executed from the root of this repository
+All commands should be executed from the demo folder of this repository
 
 ```sh
 ./1_kcp_setup/kind-setup.sh
