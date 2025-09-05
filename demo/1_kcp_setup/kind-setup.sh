@@ -52,7 +52,7 @@ helm repo add kcp https://kcp-dev.github.io/helm-charts
 helm repo update
 helm upgrade \
   --install \
-  --values ./kind-values.yaml \
+  --values ./values.yaml \
   --namespace kcp \
   --create-namespace \
   --version "0.12.3" \
@@ -61,7 +61,7 @@ helm upgrade \
 echo "Generating KCP admin kubeconfig…"
 ./generate-admin-kubeconfig.sh
 
-hostname="$(yq '.externalHostname' kind-values.yaml)"
+hostname="$(yq '.externalHostname' values.yaml)"
 
 echo "Checking /etc/hosts for ${hostname}…"
 if ! grep -q "$hostname" /etc/hosts; then
