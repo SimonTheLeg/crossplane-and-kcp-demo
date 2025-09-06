@@ -24,5 +24,5 @@ This then gives you two kubeconfigs:
 export KUBECONFIG=kcp-kind.kubeconfig
 
 # admin kubeconfig of kcp
-export KUBECONFIG=kcp.kubeconfig
+export KUBECONFIG=kcp-admin.kubeconfig
 ```

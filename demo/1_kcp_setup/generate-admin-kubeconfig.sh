@@ -6,27 +6,27 @@ cd "$(dirname "$0")"
 
 hostname="$(yq '.externalHostname' values.yaml)"
 
-cat << EOF > ../kcp.kubeconfig
+cat << EOF > ../kcp-admin.kubeconfig
 apiVersion: v1
 kind: Config
 clusters:
   - cluster:
       insecure-skip-tls-verify: true
       server: "https://${hostname}:8443/clusters/root"
-    name: kind-kcp
+    name: admin-kcp
 contexts:
   - context:
-      cluster: kind-kcp
-      user: kind-kcp
-    name: kind-kcp
-current-context: kind-kcp
+      cluster: admin-kcp
+      user: admin-kcp
+    name: admin-kcp
+current-context: admin-kcp
 users:
-  - name: kind-kcp
+  - name: admin-kcp
     user:
       token: admin-token
 EOF
 
-echo "Kubeconfig file created at kcp.kubeconfig"
+echo "Kubeconfig file created at kcp-admin.kubeconfig"
 echo ""
-echo "export KUBECONFIG=kcp.kubeconfig"
+echo "export KUBECONFIG=kcp-admin.kubeconfig"
 echo ""
