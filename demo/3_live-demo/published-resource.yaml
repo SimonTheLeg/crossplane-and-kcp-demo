@@ -1,0 +1,21 @@
+apiVersion: syncagent.kcp.io/v1alpha1
+kind: PublishedResource
+metadata:
+  name: databases.internal.example
+spec:
+  resource:
+    kind: App
+    apiGroup: example.crossplane.io
+    versions: [v1]
+  related:
+    - identifier: database-credentials
+      origin: service
+      kind: Secret
+      object:
+        selector:
+          matchLabels:
+            # TODO change this once we have the database resource
+            syncagent.kcp.io/selector: my-app
+          rewrite:
+            template:
+              template: "{{ .Value }}"
