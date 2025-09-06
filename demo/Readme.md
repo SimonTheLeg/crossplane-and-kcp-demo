@@ -93,7 +93,7 @@ Setup namespace and kubeconfig secret
 export KUBECONFIG="provider-kcp.kubeconfig"
 k create namespace kcp-sync-agent
 k create secret generic kcp-kubeconfig -n kcp-sync-agent --from-file=kubeconfig=provider-kcp.kubeconfig
-k apply -f 
+k apply -f 2_provider_setup/api-syncagent/additional-rbac
 ```
 
 Deploy kcp-api-syncagent
