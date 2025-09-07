@@ -18,4 +18,3 @@ spec:
     state: Accepted
     selector:
       matchAll: true
-  - resource: 
