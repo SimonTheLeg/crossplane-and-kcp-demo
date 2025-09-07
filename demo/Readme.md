@@ -40,7 +40,7 @@ export KUBECONFIG=kcp-admin.kubeconfig
 
 ```sh
 export KUBECONFIG=kcp-admin.kubeconfig
-k create-workspace provider
+k create workspace provider
 # simply create the kubeconfig by appending :provider to the url and replace the name so it looks like a 
 yq '.clusters[0].cluster.server += ":provider"' kcp-admin.kubeconfig | sed 's/admin-kcp/provider-kcp/g' > provider-kcp.kubeconfig
 ```
@@ -49,7 +49,7 @@ yq '.clusters[0].cluster.server += ":provider"' kcp-admin.kubeconfig | sed 's/ad
 
 ```sh
 export KUBECONFIG=kcp-admin.kubeconfig
-k create-workspace consumer
+k create workspace consumer
 # simply create the kubeconfig by appending :consumer to the url and replace the name so it looks like a 
 yq '.clusters[0].cluster.server += ":consumer"' kcp-admin.kubeconfig | sed 's/admin-kcp/consumer-kcp/g' > consumer-kcp.kubeconfig
 ```
