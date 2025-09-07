@@ -171,7 +171,7 @@ As the consumer, bind the databases APIExport to make the api-available in your 
 ```sh
 export KUBECONFIG="consumer-kcp.kubeconfig"
 k apply -f 3_live-demo/apibinding.yaml
-k apply -f 3_live-demo/xr-nginx.yaml
+k apply -f 3_live-demo/xr-db.yaml
 ```
 
 You can now see that in the provider the pods and secret have been created and that the secret has been synched over to the consumer workspace.

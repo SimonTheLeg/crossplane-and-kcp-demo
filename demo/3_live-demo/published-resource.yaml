@@ -4,8 +4,8 @@ metadata:
   name: databases.internal.example
 spec:
   resource:
-    kind: App
-    apiGroup: example.crossplane.io
+    kind: MySQLDatabase
+    apiGroup: database.example.crossplane.io
     versions: [v1]
   related:
     - identifier: database-credentials
@@ -15,7 +15,7 @@ spec:
         selector:
           matchLabels:
             # TODO change this once we have the database resource
-            syncagent.kcp.io/selector: my-app
+            syncagent.kcp.io/selector: my-db
           rewrite:
             template:
               template: "{{ .Value }}"
