@@ -155,7 +155,6 @@ export KUBECONFIG="provider-kind.kubeconfig"
 k apply -f 2_provider_setup/crossplane/
 ```
 
-
 # Live Demo
 
 ## Configure the api-syncagent

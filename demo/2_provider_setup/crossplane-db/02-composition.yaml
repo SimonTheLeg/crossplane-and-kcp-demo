@@ -20,6 +20,7 @@ spec:
             {{ $dbName := .observed.composite.resource.spec.name }}
             {{ $userName := printf "%s-user" $dbName }}
             {{ $secretName := printf "%s-secret" $dbName }}
+            {{ $exposedSecretName := printf "%s-secret-exposed" $dbName }}
             ---
             apiVersion: mysql.sql.crossplane.io/v1alpha1
             kind: Database
@@ -32,6 +33,17 @@ spec:
               name: {{ $dbName }}
             spec:
               forProvider: {}
+            ---
+            apiVersion: v1
+            kind: Secret
+            metadata:
+              annotations:
+                gotemplating.fn.crossplane.io/composition-resource-name: secret
+                gotemplating.fn.crossplane.io/ready: "True"
+              namespace: default
+              name: {{ $secretName }}
+            data:
+              password: {{ randAlphaNum 16 | b64enc }}
             ---
             apiVersion: mysql.sql.crossplane.io/v1alpha1
             kind: User
@@ -62,9 +74,18 @@ spec:
             kind: Secret
             metadata:
               annotations:
-                gotemplating.fn.crossplane.io/composition-resource-name: secret
+                gotemplating.fn.crossplane.io/composition-resource-name: secret-exposed
                 gotemplating.fn.crossplane.io/ready: "True"
+              labels:
+                syncagent.kcp.io/selector: my-app
               namespace: default
-              name: {{ $secretName }}
+              name: {{ $exposedSecretName }}
+            {{ if eq $.observed.resources nil }}
+            data: {}
+            {{ else }}
             data:
-              password: {{ randAlphaNum 16 | b64enc }}
+              username: {{ ( index $.observed.resources "user" ).connectionDetails.username }}
+              password: {{ ( index $.observed.resources "user" ).connectionDetails.password }}
+              port: {{ ( index $.observed.resources "user" ).connectionDetails.port }}
+              endpoint: {{ ( index $.observed.resources "user" ).connectionDetails.endpoint }}
+            {{ end }}
