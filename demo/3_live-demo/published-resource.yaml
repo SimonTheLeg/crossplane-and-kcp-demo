@@ -7,6 +7,9 @@ spec:
     kind: MySQLDatabase
     apiGroup: database.example.crossplane.io
     versions: [v1]
+  naming:
+    # need to adjust it to prevent collisions (normally clustername is the namespace)
+    name: "{{ .ClusterName }}-{{ .Object.metadata.name | sha3short }}"
   related:
     - identifier: database-credentials
       origin: service
@@ -14,8 +17,10 @@ spec:
       object:
         selector:
           matchLabels:
-            # TODO change this once we have the database resource
-            syncagent.kcp.io/selector: my-db
+            syncagent.kcp.io/selector: '{{ (split "-" .RemoteObject.metadata.name)._0 }}-{{ .LocalObject.metadata.name | sha3short }}'
           rewrite:
             template:
               template: "{{ .Value }}"
+        namespace:
+          template:
+            template: "default"

@@ -17,10 +17,11 @@ spec:
         source: Inline
         inline:
           template: |
+            {{ $objName := .observed.composite.resource.metadata.name }}
             {{ $dbName := .observed.composite.resource.spec.name }}
             {{ $userName := printf "%s-user" $dbName }}
             {{ $secretName := printf "%s-secret" $dbName }}
-            {{ $credentials := printf "%s-credentials" $dbName }}
+            {{ $credentials := printf "%s-%s-credentials" $objName $dbName }}
             ---
             apiVersion: mysql.sql.crossplane.io/v1alpha1
             kind: Database
@@ -77,7 +78,7 @@ spec:
                 gotemplating.fn.crossplane.io/composition-resource-name: secret-exposed
                 gotemplating.fn.crossplane.io/ready: "True"
               labels:
-                syncagent.kcp.io/selector: my-db
+                syncagent.kcp.io/selector: {{ $objName }}
               namespace: default
               name: {{ $credentials }}
             {{ if eq $.observed.resources nil }}
