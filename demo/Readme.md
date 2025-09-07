@@ -40,7 +40,7 @@ export KUBECONFIG=kcp-admin.kubeconfig
 
 ```sh
 export KUBECONFIG=kcp-admin.kubeconfig
-k create workspace provider
+k create-workspace provider
 # simply create the kubeconfig by appending :provider to the url and replace the name so it looks like a 
 yq '.clusters[0].cluster.server += ":provider"' kcp-admin.kubeconfig | sed 's/admin-kcp/provider-kcp/g' > provider-kcp.kubeconfig
 ```
@@ -49,7 +49,7 @@ yq '.clusters[0].cluster.server += ":provider"' kcp-admin.kubeconfig | sed 's/ad
 
 ```sh
 export KUBECONFIG=kcp-admin.kubeconfig
-k create workspace consumer
+k create-workspace consumer
 # simply create the kubeconfig by appending :consumer to the url and replace the name so it looks like a 
 yq '.clusters[0].cluster.server += ":consumer"' kcp-admin.kubeconfig | sed 's/admin-kcp/consumer-kcp/g' > consumer-kcp.kubeconfig
 ```
@@ -124,12 +124,37 @@ helm install crossplane crossplane-stable/crossplane \
   --create-namespace
 ```
 
+## Setup the Database
+
+Deploys a mysql database.
+
+```bash
+k apply -f 2_provider_setup/database/
+```
+
+## Setup provider-sql
+
+Setup provider-sql through which Crossplane will manage the database.
+
+```bash
+k apply -f 2_provider_setup/provider/provider.yaml
+k wait --for condition=healthy -f 2_provider_setup/provider/provider.yaml
+```
+
+Create the provider config.
+
+```bash
+k create secret generic db-conn --from-literal endpoint=mysql.default.svc.cluster.local --from-literal port=3306 --from-literal username=root --from-literal password=password
+k apply -f 2_provider_setup/provider/config.yaml
+````
+
 ## Setup The Crossplane Composite Resource
 
 ```bash
 export KUBECONFIG="provider-kind.kubeconfig"
 k apply -f 2_provider_setup/crossplane/
 ```
+
 
 # Live Demo
 
