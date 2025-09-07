@@ -59,6 +59,7 @@ yq '.clusters[0].cluster.server += ":consumer"' kcp-admin.kubeconfig | sed 's/ad
 api-syncagent requires you to create at least a blank ApiExport for it to fill it later
 
 ```sh
+export KUBECONFIG=provider-kcp.kubeconfig
 k apply -f 2_provider_setup/kcp/apiexport.yaml
 ```
 
@@ -90,15 +91,16 @@ k rollout restart -n kube-system deployment/coredns
 Setup namespace and kubeconfig secret
 
 ```sh
-export KUBECONFIG="provider-kcp.kubeconfig"
+export KUBECONFIG="provider-kind.kubeconfig"
 k create namespace kcp-sync-agent
 k create secret generic kcp-kubeconfig -n kcp-sync-agent --from-file=kubeconfig=provider-kcp.kubeconfig
-k apply -f 2_provider_setup/api-syncagent/additional-rbac
 ```
 
 Deploy kcp-api-syncagent
 
 ```sh
+export KUBECONFIG="provider-kind.kubeconfig"
+k apply -f 2_provider_setup/api-syncagent/additional-rbac
 helm upgrade \
   --install \
   --values ./2_provider_setup/api-syncagent/values.yaml \
@@ -129,6 +131,7 @@ helm install crossplane crossplane-stable/crossplane \
 Deploys a mysql database.
 
 ```bash
+export KUBECONFIG="provider-kind.kubeconfig"
 k apply -f 2_provider_setup/database/
 ```
 
@@ -137,6 +140,7 @@ k apply -f 2_provider_setup/database/
 Setup provider-sql through which Crossplane will manage the database.
 
 ```bash
+export KUBECONFIG="provider-kind.kubeconfig"
 k apply -f 2_provider_setup/provider/provider.yaml
 k wait --for condition=healthy -f 2_provider_setup/provider/provider.yaml
 ```
@@ -144,6 +148,7 @@ k wait --for condition=healthy -f 2_provider_setup/provider/provider.yaml
 Create the provider config.
 
 ```bash
+export KUBECONFIG="provider-kind.kubeconfig"
 k create secret generic db-conn --from-literal endpoint=mysql.default.svc.cluster.local --from-literal port=3306 --from-literal username=root --from-literal password=password
 k apply -f 2_provider_setup/provider/config.yaml
 ````
