@@ -228,21 +228,17 @@ Firstly explain the tmux setup and our roles: Lovro=Provider Simon=Consumer.
     k apply -f 3_live-demo/xr-db.yaml
     ```
 
-## Configure the api-syncagent
+4. Show that the secret was synched successfully
 
-As the provider, create the published resource to send the example.crossplane.io/apps api to the provider kcp workspace.
+    ```sh
+    k get secret
+    ```
 
-```sh
-export KUBECONFIG="provider-kind.kubeconfig"
-k apply -f 3_live-demo/published-resource.yaml
-```
+--- Lovro ---
 
-As the consumer, bind the databases APIExport to make the api-available in your workspace and create a database
+1. Show that the secret and all resources were successfully created in the provider workspace. Highlight that we need this unique name, so we don't have any naming collisions later on
 
-```sh
-export KUBECONFIG="consumer-kcp.kubeconfig"
-k apply -f 3_live-demo/apibinding.yaml
-k apply -f 3_live-demo/xr-db.yaml
-```
-
-You can now see that in the provider the pods and secret have been created and that the secret has been synched over to the consumer workspace.
+    ```sh
+    k get mysqldatabases.database.example.crossplane.io
+    k get secrets | grep credentials
+    ```
