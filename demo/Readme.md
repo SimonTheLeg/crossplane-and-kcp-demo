@@ -160,7 +160,73 @@ export KUBECONFIG="provider-kind.kubeconfig"
 k apply -f 2_provider_setup/crossplane/
 ```
 
-# Live Demo
+# Live Demo Runbook
+
+--- Simon ---
+
+Firstly explain the tmux setup and our roles: Lovro=Provider Simon=Consumer.
+
+--- Lovro ---
+
+1. Go to provider tab
+2. Show that crossplane and the mysql provider is already installed and running:
+
+    ```sh
+    k get pods -n crossplane-system
+    ```
+
+3. Show the crossplane composition, specifically show:
+    - it registers a type `database.example.crossplane.io/v1`
+    - it creates a `mysql.sql.crossplane.io/v1alpha1` object
+    - it creates a secret, which we want to sync back to the consumer later
+
+    ```sh
+    k get compositions.apiextensions.crossplane.io mysql-database-simple -o yaml | cat -l yaml
+    ```
+
+4. Show the published resource, specifically show:
+    - the renaming and that we need it, because the object on the provider cluster is global and we need to ensure that there are no naming collisions
+    - that we needed to use a little trick on the connector due to a bug in sync-agent. But in the future this should be possible using .ClusterName
+    - explain that we need this label so the sync-agent can find the secret in the provider cluster and does not sync all secrets over
+
+    ```sh
+    cat -l yaml 3_live-demo/published-resource.yaml
+    ```
+
+5. Apply the published resource:
+
+    ```sh
+    # in the right pane
+    k apply -f 3_live-demo/published-resource.yaml
+    ```
+
+--- Simon ---
+
+1. Show the api-binding and recap that we need this to make the `database.example.crossplane.io/v1` api available in the consumer workspace
+
+    - highlight the reference path
+    - explain that in the heat of the moment we forgot to restrict permissions
+
+    ```sh
+    cat -l yaml 3_live-demo/apibinding.yaml
+    ```
+
+    ```sh
+    k apply -f 3_live-demo/apibinding.yaml
+    ```
+
+2. Show that the `database.example.crossplane.io/v1` api is now available in the consumer workspace
+
+    ```sh
+    k api-resources k api-resources | grep database
+    ```
+
+3. Show the database xr and apply it
+
+    ```sh
+    cat -l yaml 3_live-demo/xr-db.yaml
+    k apply -f 3_live-demo/xr-db.yaml
+    ```
 
 ## Configure the api-syncagent
 
