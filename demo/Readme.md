@@ -176,7 +176,7 @@ Firstly explain the tmux setup and our roles: Lovro=Provider Simon=Consumer.
     ```
 
 3. Show the crossplane composition, specifically show:
-    - it registers a type `database.example.crossplane.io/v1`
+    - it registers a type `database.mycorp.io/v1`
     - it creates a `mysql.sql.crossplane.io/v1alpha1` object
     - it creates a secret, which we want to sync back to the consumer later
 
@@ -202,7 +202,7 @@ Firstly explain the tmux setup and our roles: Lovro=Provider Simon=Consumer.
 
 --- Simon ---
 
-1. Show the api-binding and recap that we need this to make the `database.example.crossplane.io/v1` api available in the consumer workspace
+1. Show the api-binding and recap that we need this to make the `database.mycorp.io/v1` api available in the consumer workspace
 
     - highlight the reference path
     - explain that in the heat of the moment we forgot to restrict permissions
@@ -215,7 +215,7 @@ Firstly explain the tmux setup and our roles: Lovro=Provider Simon=Consumer.
     k apply -f 3_live-demo/apibinding.yaml
     ```
 
-2. Show that the `database.example.crossplane.io/v1` api is now available in the consumer workspace
+2. Show that the `database.mycorp.io/v1` api is now available in the consumer workspace
 
     ```sh
     k api-resources k api-resources | grep database
@@ -239,6 +239,6 @@ Firstly explain the tmux setup and our roles: Lovro=Provider Simon=Consumer.
 1. Show that the secret and all resources were successfully created in the provider workspace. Highlight that we need this unique name, so we don't have any naming collisions later on
 
     ```sh
-    k get mysqldatabases.database.example.crossplane.io
+    k get mysqldatabases.database.mycorp.io
     k get secrets | grep credentials
     ```

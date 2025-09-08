@@ -1,4 +1,4 @@
-apiVersion: database.example.crossplane.io/v1
+apiVersion: database.mycorp.io/v1
 kind: MySQLDatabase
 metadata:
   name: my-simple-test

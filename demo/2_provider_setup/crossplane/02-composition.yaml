@@ -4,7 +4,7 @@ metadata:
   name: mysql-database-simple
 spec:
   compositeTypeRef:
-    apiVersion: database.example.crossplane.io/v1
+    apiVersion: database.mycorp.io/v1
     kind: MySQLDatabase
   mode: Pipeline
   pipeline:
@@ -65,7 +65,7 @@ spec:
                 name: {{ printf "%s-connection-secret" $dbName }}
                 namespace: default
             ---
-            apiVersion: database.example.crossplane.io/v1
+            apiVersion: database.mycorp.io/v1
             kind: MySQLDatabase
             status:
               ready: {{ and (eq (.observed.resources.database | getResourceCondition "Synced").Status "True") (eq (.observed.resources.user | getResourceCondition "Synced").Status "True") }}

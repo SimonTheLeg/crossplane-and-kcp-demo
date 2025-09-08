@@ -5,7 +5,7 @@ metadata:
 spec:
   resource:
     kind: MySQLDatabase
-    apiGroup: database.example.crossplane.io
+    apiGroup: database.mycorp.io
     versions: [v1]
   naming:
     # need to adjust it to prevent collisions (normally clustername is the namespace)
