@@ -218,7 +218,7 @@ Firstly explain the tmux setup and our roles: Lovro=Provider Simon=Consumer.
 2. Show that the `database.mycorp.io/v1` api is now available in the consumer workspace
 
     ```sh
-    k api-resources k api-resources | grep database
+    k api-resources | grep database
     ```
 
 3. Show the database xr and apply it
