@@ -8,7 +8,6 @@ spec:
     apiGroup: database.mycorp.io
     versions: [v1]
   naming:
-    # need to adjust it to prevent collisions (normally clustername is the namespace)
     name: "{{ .ClusterName }}-{{ .Object.metadata.name | sha3short }}"
   related:
     - identifier: database-credentials
