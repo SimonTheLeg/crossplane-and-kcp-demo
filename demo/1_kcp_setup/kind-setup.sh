@@ -33,13 +33,13 @@ echo "Installing cert-manager…"
 helm repo add jetstack https://charts.jetstack.io
 helm repo update
 
-kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.13.0/cert-manager.crds.yaml
+kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.18.2/cert-manager.crds.yaml
 helm upgrade \
   --install \
   --wait \
   --namespace cert-manager \
   --create-namespace \
-  --version v1.13.0 \
+  --version v1.18.2 \
   cert-manager jetstack/cert-manager
 
 # Installing cert-manager will end with a message saying that the next step
