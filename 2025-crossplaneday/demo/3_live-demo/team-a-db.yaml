@@ -1,0 +1,6 @@
+apiVersion: database.mycorp.io/v1
+kind: MySQLDatabase
+metadata:
+  name: team-a-database
+spec:
+  name: team-a-database

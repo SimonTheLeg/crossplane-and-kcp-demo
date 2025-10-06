@@ -1,0 +1,25 @@
+apiVersion: syncagent.kcp.io/v1alpha1
+kind: PublishedResource
+metadata:
+  name: databases.internal.example
+spec:
+  resource:
+    kind: MySQLDatabase
+    apiGroup: database.mycorp.io
+    versions: [v1]
+  naming:
+    name: "{{ .ClusterName }}-{{ .Object.metadata.name | sha3short }}"
+  related:
+    - identifier: database-credentials
+      origin: service
+      kind: Secret
+      object:
+        selector:
+          matchLabels:
+            syncagent.kcp.io/selector: '{{ (split "-" .RemoteObject.metadata.name)._0 }}-{{ .LocalObject.metadata.name | sha3short }}'
+          rewrite:
+            template:
+              template: "{{ .Value }}"
+        namespace:
+          template:
+            template: "default"

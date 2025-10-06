@@ -1,0 +1,30 @@
+externalHostname: "kcp.dev.local"
+externalPort: "8443"
+etcd:
+  resources:
+    requests:
+      memory: 256Mi
+certificates:
+  dnsNames:
+    - localhost
+    - kcp.dev.local
+kcp:
+  # tag is set via --set flag to make it more dynamic for testing purposes
+  volumeClassName: "standard"
+  tokenAuth:
+    enabled: true
+  hostAliases:
+    enabled: true
+    values:
+      - ip: "10.96.0.100"
+        hostnames:
+          - "kcp.dev.local"
+  extraFlags:
+    # this is still required, so that virtualWorkspaceURLs are published in the APIExport.
+    # This because we are using kcp v0.28.1 and syncagent v0.3.0
+    - --feature-gates=EnableDeprecatedAPIExportVirtualWorkspacesUrls=true
+kcpFrontProxy:
+  service:
+    type: NodePort
+    nodePort: 31443
+    clusterIP: "10.96.0.100"
