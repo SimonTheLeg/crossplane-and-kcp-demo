@@ -164,7 +164,7 @@ k apply -f 2_provider_setup/crossplane/
 
 # Live Demo Runbook
 
-Firstly explain the tmux setup and our roles: Lovro=Provider Simon=Consumer.
+Firstly explain the tmux setup and different roles:
 
 --- Provider ---
 
