@@ -164,6 +164,8 @@ k apply -f 2_provider_setup/crossplane/
 
 # Live Demo Runbook
 
+(note: we are using [kubectl neat](https://github.com/itaysk/kubectl-neat) here, to make the output a little easier for the audience to digest. If you don't want to use the plugin, simply run "k get" instead of "k neat get" )
+
 Firstly explain the tmux setup and different roles:
 
 --- Provider ---
@@ -181,7 +183,7 @@ Firstly explain the tmux setup and different roles:
     - it creates a secret, which we want to sync back to the consumer later
 
     ```sh
-    k get compositions.apiextensions.crossplane.io mysql-database-simple -o yaml | cat -l yaml
+    k neat get compositions.apiextensions.crossplane.io mysql-database-simple -o yaml | cat -l yaml
     ```
 
 4. Show the published resource, specifically show:
