@@ -39,9 +39,9 @@ export KUBECONFIG=kcp-admin.kubeconfig
 ## Create the Provider workspace and kubeconfig
 
 ```sh
-export KUBECONFIG=kcp-admin.kubeconfig
+export KUBECONFIG="kcp-admin.kubeconfig"
 k create workspace provider
-# simply create the kubeconfig by appending :provider to the url and replace the name so it looks like a 
+# simply create the kubeconfig by appending :provider to the url and replace the name so it looks like a different kubeconfig in the demo
 yq '.clusters[0].cluster.server += ":provider"' kcp-admin.kubeconfig | sed 's/admin-kcp/provider-kcp/g' > provider-kcp.kubeconfig
 ```
 
@@ -73,6 +73,7 @@ kind create cluster --name provider
 Afterwards edit the CoreDNS configmap to include a rewrite:
 
 ```sh
+export KUBECONFIG="provider-kind.kubeconfig"
 k edit -n kube-system cm coredns
 # in there add the following
 .:53 {
@@ -106,7 +107,7 @@ helm upgrade \
   --values ./2_provider_setup/api-syncagent/values.yaml \
   --namespace kcp-sync-agent \
   --create-namespace \
-  --version "0.3.1" \
+  --version "0.4.1" \
   kcp-api-syncagent kcp/api-syncagent
 ```
 
@@ -123,7 +124,8 @@ helm repo update
 # Install Crossplane
 helm install crossplane crossplane-stable/crossplane \
   --namespace crossplane-system \
-  --create-namespace
+  --create-namespace \
+  --version "2.0.2"
 ```
 
 ## Setup the Database
@@ -162,11 +164,9 @@ k apply -f 2_provider_setup/crossplane/
 
 # Live Demo Runbook
 
---- Simon ---
-
 Firstly explain the tmux setup and our roles: Lovro=Provider Simon=Consumer.
 
---- Lovro ---
+--- Provider ---
 
 1. Go to provider tab
 2. Show that crossplane and the mysql provider is already installed and running:
@@ -200,7 +200,7 @@ Firstly explain the tmux setup and our roles: Lovro=Provider Simon=Consumer.
     k apply -f 3_live-demo/published-resource.yaml
     ```
 
---- Simon ---
+--- Consumer ---
 
 1. Show the api-binding and recap that we need this to make the `database.mycorp.io/v1` api available in the consumer workspace
 
@@ -224,8 +224,8 @@ Firstly explain the tmux setup and our roles: Lovro=Provider Simon=Consumer.
 3. Show the database xr and apply it
 
     ```sh
-    cat -l yaml 3_live-demo/xr-db.yaml
-    k apply -f 3_live-demo/xr-db.yaml
+    cat -l yaml 3_live-demo/team-a-db.yaml
+    k apply -f 3_live-demo/team-a-db.yaml
     ```
 
 4. Show that the secret was synched successfully
@@ -234,7 +234,7 @@ Firstly explain the tmux setup and our roles: Lovro=Provider Simon=Consumer.
     k get secret
     ```
 
---- Lovro ---
+--- Provider ---
 
 1. Show that the secret and all resources were successfully created in the provider workspace. Highlight that we need this unique name, so we don't have any naming collisions later on
 

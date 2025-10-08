@@ -39,6 +39,26 @@ spec:
             kind: Secret
             metadata:
               annotations:
+                gotemplating.fn.crossplane.io/composition-resource-name: secret-exposed
+                gotemplating.fn.crossplane.io/ready: "True"
+              labels:
+                syncagent.kcp.io/selector: {{ $objName }}
+              namespace: default
+              name: {{ $credentials }}
+            {{ if eq $.observed.resources nil }}
+            data: {}
+            {{ else }}
+            data:
+              username: {{ ( index $.observed.resources "user" ).connectionDetails.username }}
+              password: {{ ( index $.observed.resources "user" ).connectionDetails.password }}
+              port: {{ ( index $.observed.resources "user" ).connectionDetails.port }}
+              endpoint: {{ ( index $.observed.resources "user" ).connectionDetails.endpoint }}
+            {{ end }}
+            ---
+            apiVersion: v1
+            kind: Secret
+            metadata:
+              annotations:
                 gotemplating.fn.crossplane.io/composition-resource-name: secret
                 gotemplating.fn.crossplane.io/ready: "True"
               namespace: default
@@ -70,23 +90,3 @@ spec:
             status:
               ready: {{ and (eq (.observed.resources.database | getResourceCondition "Synced").Status "True") (eq (.observed.resources.user | getResourceCondition "Synced").Status "True") }}
               connectionSecret: {{ printf "%s-connection-secret" $dbName }}
-            ---
-            apiVersion: v1
-            kind: Secret
-            metadata:
-              annotations:
-                gotemplating.fn.crossplane.io/composition-resource-name: secret-exposed
-                gotemplating.fn.crossplane.io/ready: "True"
-              labels:
-                syncagent.kcp.io/selector: {{ $objName }}
-              namespace: default
-              name: {{ $credentials }}
-            {{ if eq $.observed.resources nil }}
-            data: {}
-            {{ else }}
-            data:
-              username: {{ ( index $.observed.resources "user" ).connectionDetails.username }}
-              password: {{ ( index $.observed.resources "user" ).connectionDetails.password }}
-              port: {{ ( index $.observed.resources "user" ).connectionDetails.port }}
-              endpoint: {{ ( index $.observed.resources "user" ).connectionDetails.endpoint }}
-            {{ end }}

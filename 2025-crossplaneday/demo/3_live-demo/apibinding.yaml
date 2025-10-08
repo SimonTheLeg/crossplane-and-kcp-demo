@@ -18,3 +18,9 @@ spec:
     state: Accepted
     selector:
       matchAll: true
+  - resource: events
+    verbs: ["*"]
+    state: Accepted
+    selector:
+      matchAll: true
+

@@ -55,7 +55,7 @@ helm upgrade \
   --values ./values.yaml \
   --namespace kcp \
   --create-namespace \
-  --version "0.12.3" \
+  --version "0.12.5" \
   kcp kcp/kcp
 
 echo "Generating KCP admin kubeconfig…"

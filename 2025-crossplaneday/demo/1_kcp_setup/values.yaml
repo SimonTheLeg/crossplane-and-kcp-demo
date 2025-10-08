@@ -19,10 +19,6 @@ kcp:
       - ip: "10.96.0.100"
         hostnames:
           - "kcp.dev.local"
-  extraFlags:
-    # this is still required, so that virtualWorkspaceURLs are published in the APIExport.
-    # This because we are using kcp v0.28.1 and syncagent v0.3.0
-    - --feature-gates=EnableDeprecatedAPIExportVirtualWorkspacesUrls=true
 kcpFrontProxy:
   service:
     type: NodePort

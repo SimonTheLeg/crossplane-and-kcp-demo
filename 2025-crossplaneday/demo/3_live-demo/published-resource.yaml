@@ -16,7 +16,7 @@ spec:
       object:
         selector:
           matchLabels:
-            syncagent.kcp.io/selector: '{{ (split "-" .RemoteObject.metadata.name)._0 }}-{{ .LocalObject.metadata.name | sha3short }}'
+            syncagent.kcp.io/selector: '{{ .LocalObject.metadata.name }}'
           rewrite:
             template:
               template: "{{ .Value }}"
