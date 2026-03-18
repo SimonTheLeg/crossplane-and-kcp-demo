@@ -22,8 +22,6 @@ step "Setting up kcp cluster and kcp..."
 step "Waiting for kcp API server to be reachable..."
 export KUBECONFIG="kcp-admin.kubeconfig"
 SECONDS=0
-echo "Sleeping for 30 seconds, then will start checking"
-sleep 30 # we need to wait at least this long
 until kubectl get --raw "/readyz" &>/dev/null; do
   if (( SECONDS >= 180 )); then
     echo "Timed out waiting for kcp API server after 3 minutes."
