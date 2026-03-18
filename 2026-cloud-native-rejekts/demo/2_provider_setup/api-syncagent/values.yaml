@@ -1,2 +1,2 @@
-apiExportName: databases.internal.example
+apiExportEndpointSliceName: databases.internal.example
 kcpKubeconfig: kcp-kubeconfig

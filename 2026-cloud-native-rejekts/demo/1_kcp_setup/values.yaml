@@ -19,6 +19,8 @@ kcp:
       - ip: "10.96.0.100"
         hostnames:
           - "kcp.dev.local"
+  extraFlags:
+    - "--shard-virtual-workspace-url=https://kcp.dev.local:8443"
 kcpFrontProxy:
   service:
     type: NodePort
