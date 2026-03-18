@@ -4,6 +4,10 @@ set -euo pipefail
 
 cd "$(dirname "$0")"
 
+: "${CERT_MANAGER_CHART_VERSION:?must be set}"
+: "${KCP_CHART_VERSION:?must be set}"
+: "${KIND_NODE_IMAGE:?must be set}"
+
 kind=kind
 if ! [ -x "$(command -v kind)" ]; then
   echo "kind is not installed. Please install kind"
@@ -18,6 +22,7 @@ export KUBECTL_CONTEXT="${KUBECTL_CONTEXT:-}"
 if ! $kind get clusters | grep -w -q "$CLUSTER_NAME"; then
   $kind create cluster \
     --name "$CLUSTER_NAME" \
+    --image "${KIND_NODE_IMAGE}" \
     --config ./kind/config.yaml
 else
   echo "Cluster $CLUSTER_NAME already exists."
@@ -28,13 +33,13 @@ echo "Installing cert-manager…"
 helm repo add jetstack https://charts.jetstack.io
 helm repo update
 
-kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.18.2/cert-manager.crds.yaml
+kubectl apply -f "https://github.com/cert-manager/cert-manager/releases/download/${CERT_MANAGER_CHART_VERSION}/cert-manager.crds.yaml"
 helm upgrade \
   --install \
   --wait \
   --namespace cert-manager \
   --create-namespace \
-  --version v1.18.2 \
+  --version "${CERT_MANAGER_CHART_VERSION}" \
   cert-manager jetstack/cert-manager
 
 # Installing cert-manager will end with a message saying that the next step
@@ -50,7 +55,7 @@ helm upgrade \
   --values ./values.yaml \
   --namespace kcp \
   --create-namespace \
-  --version "0.12.5" \
+  --version "${KCP_CHART_VERSION}" \
   kcp kcp/kcp
 
 echo "Generating KCP admin kubeconfig…"

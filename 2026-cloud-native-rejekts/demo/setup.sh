@@ -4,6 +4,15 @@
 #
 set -euo pipefail
 
+KCP_CHART_VERSION="0.12.5"
+API_SYNCAGENT_CHART_VERSION="0.4.1"
+CROSSPLANE_CHART_VERSION="2.0.2"
+CERT_MANAGER_CHART_VERSION="v1.18.2"
+KIND_NODE_IMAGE="kindest/node:v1.33.4"
+PROVIDER_SQL_VERSION="v0.12.0"
+
+export API_SYNCAGENT_CHART_VERSION CROSSPLANE_CHART_VERSION CERT_MANAGER_CHART_VERSION KCP_CHART_VERSION KIND_NODE_IMAGE PROVIDER_SQL_VERSION
+
 cd "$(dirname "$0")"
 
 # Redirect all command output through sed to indent it by 4 spaces.
@@ -70,7 +79,7 @@ step "Setting up Provider kind cluster..."
 export KUBECONFIG="provider-kind.kubeconfig"
 
 if ! kind get clusters 2>/dev/null | grep -w -q provider; then
-  kind create cluster --name provider --config ./2_provider_setup/kind/config.yaml
+  kind create cluster --name provider --image "${KIND_NODE_IMAGE}" --config ./2_provider_setup/kind/config.yaml
 else
   echo "Kind cluster 'provider' already exists."
 fi
@@ -117,7 +126,7 @@ helm upgrade \
   --values ./2_provider_setup/api-syncagent/values.yaml \
   --namespace kcp-sync-agent \
   --create-namespace \
-  --version "0.4.1" \
+  --version "${API_SYNCAGENT_CHART_VERSION}" \
   kcp-api-syncagent kcp/api-syncagent
 
 # Install Crossplane
@@ -131,7 +140,7 @@ helm upgrade \
   --install \
   --namespace crossplane-system \
   --create-namespace \
-  --version "2.0.2" \
+  --version "${CROSSPLANE_CHART_VERSION}" \
   crossplane crossplane-stable/crossplane
 
 # wait for crossplane to be ready before applying any crossplane resources
@@ -147,7 +156,7 @@ kubectl apply -f 2_provider_setup/database/
 step "Setting up provider-sql..."
 export KUBECONFIG="provider-kind.kubeconfig"
 
-kubectl apply -f 2_provider_setup/provider/provider.yaml
+envsubst < 2_provider_setup/provider/provider.yaml | kubectl apply -f -
 kubectl wait --for condition=healthy -f 2_provider_setup/provider/provider.yaml --timeout=300s
 
 kubectl create secret generic db-conn \
