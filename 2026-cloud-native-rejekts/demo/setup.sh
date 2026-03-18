@@ -72,7 +72,7 @@ step "Setting up Provider kind cluster..."
 export KUBECONFIG="provider-kind.kubeconfig"
 
 if ! kind get clusters 2>/dev/null | grep -w -q provider; then
-  kind create cluster --name provider --config ./1_kcp_setup/kind/config.yaml
+  kind create cluster --name provider --config ./2_provider_setup/kind/config.yaml
 else
   echo "Kind cluster 'provider' already exists."
 fi
