@@ -28,7 +28,7 @@ else
   echo "Cluster $CLUSTER_NAME already exists."
 fi
 
-echo "Installing cert-manager…"
+echo "Installing cert-manager..."
 
 helm repo add jetstack https://charts.jetstack.io
 helm repo update
@@ -46,7 +46,7 @@ helm upgrade \
 # is to create some Issuers and/or ClusterIssuers.  That is indeed
 # among the things that the kcp helm chart will do.
 
-echo "Installing KCP…"
+echo "Installing KCP..."
 
 helm repo add kcp https://kcp-dev.github.io/helm-charts
 helm repo update
@@ -58,12 +58,12 @@ helm upgrade \
   --version "${KCP_CHART_VERSION}" \
   kcp kcp/kcp
 
-echo "Generating KCP admin kubeconfig…"
+echo "Generating KCP admin kubeconfig..."
 ./generate-admin-kubeconfig.sh
 
 hostname="$(yq '.externalHostname' values.yaml)"
 
-echo "Checking /etc/hosts for ${hostname}…"
+echo "Checking /etc/hosts for ${hostname}..."
 if ! grep -q "$hostname" /etc/hosts; then
   echo "127.0.0.1 $hostname" | sudo tee -a /etc/hosts
   echo "::1 $hostname" | sudo tee -a /etc/hosts
