@@ -85,6 +85,26 @@ spec:
                 name: {{ printf "%s-connection-secret" $dbName }}
                 namespace: default
             ---
+            apiVersion: protection.crossplane.io/v1beta1
+            kind: Usage
+            metadata:
+              name: user-pass-usage
+              namespace: default
+              annotations:
+                gotemplating.fn.crossplane.io/composition-resource-name: usage
+            spec:
+              replayDeletion: true
+              of:
+                apiVersion: v1
+                kind: Secret
+                resourceRef:
+                  name: {{ $secretName }}
+              by:
+                apiVersion: mysql.sql.crossplane.io/v1alpha1
+                kind: User
+                resourceRef:
+                  name: {{ $userName }}
+            ---
             apiVersion: database.mycorp.io/v1
             kind: MySQLDatabase
             status:
