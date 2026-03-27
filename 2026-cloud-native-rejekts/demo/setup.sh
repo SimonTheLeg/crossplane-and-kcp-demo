@@ -11,6 +11,9 @@ CERT_MANAGER_CHART_VERSION="v1.20.0"
 KIND_NODE_IMAGE="kindest/node:v1.35.1"
 PROVIDER_SQL_VERSION="v0.12.0"
 
+CACHE_DIR=".image-cache"
+UPDATE_HELM_REPOS=${UPDATE_HELM_REPOS:-true}
+
 export API_SYNCAGENT_CHART_VERSION CROSSPLANE_CHART_VERSION CERT_MANAGER_CHART_VERSION KCP_CHART_VERSION KIND_NODE_IMAGE PROVIDER_SQL_VERSION
 
 cd "$(dirname "$0")"
@@ -20,12 +23,70 @@ cd "$(dirname "$0")"
 exec 3>&1
 exec 1> >(sed 's/^/    /') 2>&1
 
-# make the output of steps blue and bold
-step() { printf '\033[1;34m%s\033[0m\n' "$*" >&3; }
+source "$(dirname "$0")/lib.sh"
 
-# Setting Up kcp Cluster and kcp
-step "Setting up kcp cluster and kcp..."
-./1_kcp_setup/kind-setup.sh
+if [ "$UPDATE_HELM_REPOS" = "true" ]; then
+  step "Updating Helm repositories..."
+  helm repo add jetstack https://charts.jetstack.io
+  helm repo add kcp https://kcp-dev.github.io/helm-charts
+  helm repo add crossplane-stable https://charts.crossplane.io/stable
+  helm repo update
+fi
+
+export KUBECONFIG="kcp-kind.kubeconfig"
+step "Creating kcp kind cluster..."
+if ! kind get clusters 2>/dev/null | grep -w -q kcp; then
+  kind create cluster \
+    --name kcp \
+    --image "${KIND_NODE_IMAGE}" \
+    --config ./1_kcp_setup/kind/config.yaml
+else
+  echo "Kind cluster 'kcp' already exists."
+fi
+
+# Preload cached images into the kcp kind cluster
+step "Preloading cached images into kcp cluster..."
+if [ -f "${CACHE_DIR}/kcp-images.tar" ] && needs_image_preload "kcp-control-plane"; then
+  kind load image-archive "${CACHE_DIR}/kcp-images.tar" --name kcp || echo "Warning: failed to preload cached images. These will be re-pulled when you install the charts."
+else
+  echo "Skipping kcp image preload (images already present or no cache file)."
+fi
+
+step "Installing cert-manager..."
+
+helm upgrade \
+  --install \
+  --wait \
+  --set crds.enabled=true \
+  --namespace cert-manager \
+  --create-namespace \
+  --version "${CERT_MANAGER_CHART_VERSION}" \
+  cert-manager jetstack/cert-manager
+
+step "Installing kcp..."
+export KUBECONFIG="kcp-kind.kubeconfig"
+
+helm upgrade \
+  --install \
+  --values ./1_kcp_setup/values.yaml \
+  --namespace kcp \
+  --create-namespace \
+  --version "${KCP_CHART_VERSION}" \
+  kcp kcp/kcp
+
+
+step "Generating kcp admin kubeconfig..."
+./1_kcp_setup/generate-admin-kubeconfig.sh
+
+step "Patching /etc/hosts"
+hostname="$(yq '.externalHostname' 1_kcp_setup/values.yaml)"
+echo "Checking /etc/hosts for ${hostname}..."
+if ! grep -q "$hostname" /etc/hosts; then
+  echo "127.0.0.1 $hostname" | sudo tee -a /etc/hosts
+  echo "::1 $hostname" | sudo tee -a /etc/hosts
+else
+  echo "$hostname already exists in /etc/hosts."
+fi
 
 # Wait until the kcp API server is ready to accept requests
 step "Waiting for kcp API server to be reachable..."
@@ -84,6 +145,14 @@ else
   echo "Kind cluster 'provider' already exists."
 fi
 
+# Preload cached images into the provider kind cluster
+step "Preloading cached images into provider cluster..."
+if [ -f "${CACHE_DIR}/provider-images.tar" ] && needs_image_preload "provider-control-plane"; then
+  kind load image-archive "${CACHE_DIR}/provider-images.tar" --name provider || echo "Warning: failed to preload cached images for provider. Continuing."
+else
+  echo "Skipping provider image preload (images already present or no cache file)."
+fi
+
 # Patch CoreDNS to rewrite kcp.dev.local -> host.docker.internal
 step "Patching CoreDNS for kcp.dev.local rewrite..."
 export KUBECONFIG="provider-kind.kubeconfig"
@@ -118,9 +187,6 @@ kubectl create secret generic kcp-kubeconfig -n kcp-sync-agent \
 
 kubectl apply -f 2_provider_setup/api-syncagent/additional-rbac
 
-helm repo add kcp https://kcp-dev.github.io/helm-charts 2>/dev/null
-helm repo update
-
 helm upgrade \
   --install \
   --values ./2_provider_setup/api-syncagent/values.yaml \
@@ -132,9 +198,6 @@ helm upgrade \
 # Install Crossplane
 step "Installing Crossplane..."
 export KUBECONFIG="provider-kind.kubeconfig"
-
-helm repo add crossplane-stable https://charts.crossplane.io/stable 2>/dev/null
-helm repo update
 
 helm upgrade \
   --install \
